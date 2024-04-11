@@ -301,20 +301,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d183eae7e0d9cc4f99a2c185de0e811, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fadeTimer: 3
+  fadeTimer: 1
   dir:
-  - sprite: {fileID: 780993654, guid: e02ce915806f95e4981fedf123017c8b, type: 3}
+  - sprite: {fileID: -1894725390, guid: bf915cfdbd11ad641a214e6ee228a1fd, type: 3}
     direction: 0
-  - sprite: {fileID: -712689026, guid: e02ce915806f95e4981fedf123017c8b, type: 3}
+  - sprite: {fileID: 1509589973, guid: bf915cfdbd11ad641a214e6ee228a1fd, type: 3}
     direction: 1
-  - sprite: {fileID: -2138397747, guid: e02ce915806f95e4981fedf123017c8b, type: 3}
-    direction: 2
-  - sprite: {fileID: -255475952, guid: e02ce915806f95e4981fedf123017c8b, type: 3}
-    direction: 3
-  - sprite: {fileID: 751987690, guid: e02ce915806f95e4981fedf123017c8b, type: 3}
+  - sprite: {fileID: -913088647, guid: bf915cfdbd11ad641a214e6ee228a1fd, type: 3}
     direction: 4
-  - sprite: {fileID: 1384238796, guid: e02ce915806f95e4981fedf123017c8b, type: 3}
+  - sprite: {fileID: -1202825803, guid: bf915cfdbd11ad641a214e6ee228a1fd, type: 3}
     direction: 5
+  - sprite: {fileID: -1835433254, guid: bf915cfdbd11ad641a214e6ee228a1fd, type: 3}
+    direction: 2
+  - sprite: {fileID: -1250879322, guid: bf915cfdbd11ad641a214e6ee228a1fd, type: 3}
+    direction: 3
 --- !u!1 &699890842
 GameObject:
   m_ObjectHideFlags: 0
