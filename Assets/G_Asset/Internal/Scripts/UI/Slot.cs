@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,6 +20,7 @@ public class Slot : MonoBehaviour
     bool isTurnOff = false;
 
     List<SlotLine> slotLines = new();
+    public Sprite defaultSprite;
 
 
     private void Start()
@@ -35,14 +37,36 @@ public class Slot : MonoBehaviour
     public void ChangeSlotItem(Item newItem)
     {
         currentItem = newItem;
-        iconImg.sprite = newItem.sprite;
-        OnChoose(false);
-        position = SlotPosition.Other;
-        isTurnOff = false;
+        if (currentItem != null)
+        {
+            iconImg.sprite = newItem.sprite;
+            OnChoose(false);
+            position = SlotPosition.Other;
+            isTurnOff = false;
+            bgImg.gameObject.SetActive(true);
+            iconImg.gameObject.SetActive(true);
+            bgImg.sprite = defaultSprite;
+        }
+        else
+        {
+            TurnOff();
+        }
     }
     public string GetName()
     {
+        if (currentItem == null)
+        {
+            return "";
+        }
         return currentItem.itemName;
+    }
+    public Item GetCurrentItem()
+    {
+        if (isTurnOff)
+        {
+            return null;
+        }
+        return currentItem;
     }
     public void SlotInit(int pos)
     {
@@ -50,6 +74,7 @@ public class Slot : MonoBehaviour
     }
     public void TurnOff(SlotPosition newPos)
     {
+        currentItem = null;
         position = newPos;
         bgImg.gameObject.SetActive(false);
         iconImg.gameObject.SetActive(false);
@@ -57,6 +82,7 @@ public class Slot : MonoBehaviour
     }
     public void TurnOff()
     {
+        currentItem = null;
         bgImg.gameObject.SetActive(false);
         iconImg.gameObject.SetActive(false);
         isTurnOff = true;
@@ -72,6 +98,10 @@ public class Slot : MonoBehaviour
     }
     public bool IsEqual(string newV)
     {
+        if (currentItem == null)
+        {
+            return false;
+        }
         return currentItem.itemName == newV;
     }
     public bool IsEqual(Slot checkSlot)
@@ -100,7 +130,23 @@ public class Slot : MonoBehaviour
     }
     public void FadeOff()
     {
-        bgImg.gameObject.SetActive(false);
+        if (isTurnOff)
+        {
+            bgImg.gameObject.SetActive(false);
+        }
+        else
+        {
+            if (currentItem != null)
+            {
+                iconImg.sprite = currentItem.sprite;
+                OnChoose(false);
+                position = SlotPosition.Other;
+                isTurnOff = false;
+                bgImg.gameObject.SetActive(true);
+                iconImg.gameObject.SetActive(true);
+                bgImg.sprite = defaultSprite;
+            }
+        }
     }
     public bool Check(int total, int parent, int target, List<SlotLine> slotLine, bool isNotRoot = true)
     {

@@ -54,10 +54,11 @@ MonoBehaviour:
   iconImg: {fileID: 6236247873697842601}
   currentItem:
     sprite: {fileID: 0}
-    name: 
+    itemName: 
   defaultColor: {r: 1, g: 1, b: 1, a: 1}
   selectedColor: {r: 0.6754716, g: 0.6206692, b: 0.6206692, a: 1}
   touchBtn: {fileID: 2691961765210674726}
+  defaultSprite: {fileID: 10911, guid: 0000000000000000f000000000000000, type: 0}
 --- !u!114 &2691961765210674726
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Profiling;
 using UnityEngine.UI;
 using static UnityEditor.PlayerSettings;
 
@@ -27,6 +29,8 @@ public class SlotController : MonoBehaviour
     private Dictionary<string, int> dataRemainStore = new();
 
     private List<DataItem> dataItems = new();
+
+    int currentLevel = 3;
     private void Awake()
     {
         if (instance != null && instance != this)
@@ -57,6 +61,10 @@ public class SlotController : MonoBehaviour
     }
     public void SpawnSlotItem(int w, int h)
     {
+        foreach (Transform child in container.transform)
+        {
+            Destroy(child.gameObject);
+        }
         positions?.Clear();
         group.constraintCount = w + 2;
         for (int i = 0; i < h + 2; i++)
@@ -232,14 +240,35 @@ public class SlotController : MonoBehaviour
 
     public void GetRight(Slot slot1, Slot slot2)
     {
+        if (currentLevel == 1)
+        {
+            GetRightLevel1(slot1, slot2);
+        }
+        else if (currentLevel == 2)
+        {
+            GetRightLevel2(slot1, slot2);
+        }
+        else if (currentLevel == 3)
+        {
+            GetRightLevel3(slot1, slot2);
+        }
+    }
+    public void GetRightLevel1(Slot slot1, Slot slot2)
+    {
         remainPositions.Remove(slot1.GetPosition());
         remainPositions.Remove(slot2.GetPosition());
 
         string key1 = slot1.GetName();
         string key2 = slot2.GetName();
 
-        dataRemainStore[key1] -= 1;
-        dataRemainStore[key2] -= 1;
+        if (key1 != "")
+        {
+            dataRemainStore[key1] -= 1;
+        }
+        if (key2 != "")
+        {
+            dataRemainStore[key2] -= 1;
+        }
 
         for (int i = 0; i < dataItems.Count; i++)
         {
@@ -254,6 +283,183 @@ public class SlotController : MonoBehaviour
         {
             LoadDataItems();
         }
+    }
+
+    public void GetRightLevel2(Slot slot1, Slot slot2)
+    {
+        int pos1 = slot1.GetPosition();
+        int pos2 = slot2.GetPosition();
+        int width = GetTotalWidthSlot();
+        int firstRow = width * 2;
+
+        bool first = false;
+
+        if (pos1 < firstRow && pos2 < firstRow)
+        {
+            first = true;
+        }
+        if (pos1 < firstRow && pos1 == pos2 - width)
+        {
+            first = true;
+        }
+        if (pos2 < firstRow && pos2 == pos1 - width)
+        {
+            first = true;
+        }
+        if (first)
+        {
+            GetRightLevel1(slot1, slot2);
+        }
+        else
+        {
+            bool oneColumn = pos1 == pos2 - width || pos2 == pos1 - width;
+
+            List<Slot> effectSlot = new();
+            int smaller;
+            int bigger;
+            if (oneColumn)
+            {
+                smaller = pos1 < pos2 ? pos1 : pos2;
+                bigger = pos1 > pos2 ? pos1 : pos2;
+            }
+            else
+            {
+                smaller = pos1;
+                bigger = pos2;
+            }
+            while (smaller >= width * 2)
+            {
+                int to = smaller;
+                int from = smaller - width;
+                SwitchBwtTwoSlot(to, from);
+                effectSlot.Add(slots[to]);
+                effectSlot.Add(slots[from]);
+                smaller -= width;
+            }
+
+            while (bigger >= width * 2)
+            {
+                int to = bigger;
+                int from = bigger - width;
+                SwitchBwtTwoSlot(to, from);
+                effectSlot.Add(slots[to]);
+                effectSlot.Add(slots[from]);
+                bigger -= width;
+            }
+
+            for (int i = 0; i < dataItems.Count; i++)
+            {
+                DataItem item = dataItems[i];
+                if (item.Contain(effectSlot))
+                {
+                    dataItems.RemoveAt(i);
+                    i--;
+                }
+            }
+            if (dataItems.Count == 0)
+            {
+                LoadDataItems();
+            }
+        }
+    }
+    public void GetRightLevel3(Slot slot1, Slot slot2)
+    {
+        int pos1 = slot1.GetPosition();
+        int pos2 = slot2.GetPosition();
+        int width = GetTotalWidthSlot();
+        int height = GetTotalHeightSlot();
+
+        int firstRow = width * height - width * 2;
+
+        bool first = false;
+
+        if (pos1 > firstRow && pos2 > firstRow)
+        {
+            first = true;
+        }
+        if (pos1 > firstRow && pos1 == pos2 + width)
+        {
+            first = true;
+        }
+        if (pos2 > firstRow && pos2 == pos1 + width)
+        {
+            first = true;
+        }
+        if (first)
+        {
+            GetRightLevel1(slot1, slot2);
+        }
+        else
+        {
+            bool oneColumn = pos1 == pos2 - width || pos2 == pos1 - width;
+
+            List<Slot> effectSlot = new();
+            int smaller;
+            int bigger;
+            if (oneColumn)
+            {
+                bigger = pos1 < pos2 ? pos1 : pos2;
+                smaller = pos1 > pos2 ? pos1 : pos2;
+            }
+            else
+            {
+                smaller = pos1;
+                bigger = pos2;
+            }
+
+            int compareValue = width * height - width * 2;
+
+            while (smaller <= compareValue)
+            {
+                int to = smaller;
+                int from = smaller + width;
+                SwitchBwtTwoSlot(to, from);
+                effectSlot.Add(slots[to]);
+                effectSlot.Add(slots[from]);
+                smaller += width;
+            }
+
+            while (bigger <= compareValue)
+            {
+                int to = bigger;
+                int from = bigger + width;
+                SwitchBwtTwoSlot(to, from);
+                effectSlot.Add(slots[to]);
+                effectSlot.Add(slots[from]);
+                bigger += width;
+            }
+
+            for (int i = 0; i < dataItems.Count; i++)
+            {
+                DataItem item = dataItems[i];
+                if (item.Contain(effectSlot))
+                {
+                    dataItems.RemoveAt(i);
+                    i--;
+                }
+            }
+            if (dataItems.Count == 0)
+            {
+                LoadDataItems();
+            }
+        }
+    }
+    public void SwitchBwtTwoSlot(int to, int from)
+    {
+        Slot currentSlot = slots[to];
+        Slot nextSlot = slots[from];
+
+        Item nextItem = nextSlot.GetCurrentItem();
+        if (nextItem != null)
+        {
+            currentSlot.ChangeSlotItem(nextItem);
+            nextSlot.TurnOff();
+        }
+    }
+    public void ChangeLevel(int newLevel)
+    {
+        currentLevel = newLevel;
+        SpawnItem(positions);
     }
 
     public int GetTotalWidthSlot()
@@ -294,6 +500,18 @@ public class DataItem
             return true;
         }
         if (slot2 == slot_1 || slot2 == slot_2)
+        {
+            return true;
+        }
+        return false;
+    }
+    public bool Contain(List<Slot> list)
+    {
+        if (list.Contains(slot1))
+        {
+            return true;
+        }
+        if (list.Contains(slot2))
         {
             return true;
         }

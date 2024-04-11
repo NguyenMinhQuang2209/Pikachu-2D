@@ -302,7 +302,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d183eae7e0d9cc4f99a2c185de0e811, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fadeTimer: 1
+  fadeTimer: 0.5
   dir:
   - sprite: {fileID: -1894725390, guid: bf915cfdbd11ad641a214e6ee228a1fd, type: 3}
     direction: 0
