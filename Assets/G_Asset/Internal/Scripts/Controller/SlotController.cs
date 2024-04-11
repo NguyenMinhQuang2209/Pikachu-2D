@@ -30,7 +30,7 @@ public class SlotController : MonoBehaviour
 
     private List<DataItem> dataItems = new();
 
-    int currentLevel = 3;
+    int currentLevel = 1;
     private void Awake()
     {
         if (instance != null && instance != this)
