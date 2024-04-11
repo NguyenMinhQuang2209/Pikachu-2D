@@ -50,6 +50,7 @@ public class TouchController : MonoBehaviour
                     bool hasPath = currentSlot.StartCheck(newSlot.GetPosition());
                     if (hasPath)
                     {
+
                         SoundController.instance.PlayWinSound();
                         List<SlotLine> slots = currentSlot.GetLine();
                         foreach (SlotLine slot in slots)
@@ -59,6 +60,8 @@ public class TouchController : MonoBehaviour
                         }
                         currentSlot.TurnOff();
                         newSlot.TurnOff();
+
+                        SlotController.instance.GetRight(currentSlot, newSlot);
                     }
                     else
                     {

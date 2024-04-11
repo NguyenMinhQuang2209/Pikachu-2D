@@ -40,6 +40,10 @@ public class Slot : MonoBehaviour
         position = SlotPosition.Other;
         isTurnOff = false;
     }
+    public string GetName()
+    {
+        return currentItem.itemName;
+    }
     public void SlotInit(int pos)
     {
         this.pos = pos;

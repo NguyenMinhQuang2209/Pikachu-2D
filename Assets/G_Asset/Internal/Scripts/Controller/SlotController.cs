@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEditor.PlayerSettings;
 
 public class SlotController : MonoBehaviour
 {
@@ -21,6 +22,11 @@ public class SlotController : MonoBehaviour
     public List<Sprite> sprites = new();
 
     private List<int> positions = new();
+    private List<int> remainPositions = new();
+    private Dictionary<string, List<Slot>> dataStore = new();
+    private Dictionary<string, int> dataRemainStore = new();
+
+    private List<DataItem> dataItems = new();
     private void Awake()
     {
         if (instance != null && instance != this)
@@ -107,18 +113,26 @@ public class SlotController : MonoBehaviour
                 }
             }
         }
+        remainPositions = new(positions);
 
-        SpawnItem();
+        SpawnItem(positions);
     }
-    public void SpawnItem()
+    public void SpawnItem(List<int> usePositions)
     {
-        List<int> notUse = new(positions);
+        dataStore?.Clear();
+        List<int> notUse = new(usePositions);
         int currentIndex = 0;
         while (notUse.Count > 0)
         {
-            int pos = notUse[0];
+            int posInList = Random.Range(0, notUse.Count);
+            int pos = notUse[posInList];
             Item currentItem = items[currentIndex];
             Slot currentSlot = slots[pos];
+
+            string key = currentItem.itemName;
+            List<Slot> keyData = dataStore.ContainsKey(key) ? dataStore[key] : new();
+            keyData.Add(currentSlot);
+
             currentSlot.ChangeSlotItem(currentItem);
             notUse.Remove(pos);
             int sidePos = Random.Range(0, notUse.Count);
@@ -126,9 +140,122 @@ public class SlotController : MonoBehaviour
             Slot sideSlot = slots[nextPos];
             sideSlot.ChangeSlotItem(currentItem);
             notUse.Remove(nextPos);
+
+            keyData.Add(sideSlot);
+
+            dataStore[key] = new(keyData);
             currentIndex = currentIndex == items.Count - 1 ? 0 : currentIndex + 1;
         }
+        LoadDataRemain();
+        LoadDataItems();
     }
+    public void LoadDataRemain()
+    {
+        dataRemainStore?.Clear();
+        for (int i = 0; i < items.Count; i++)
+        {
+            Item currentItem = items[i];
+            string key = currentItem.itemName;
+            dataRemainStore[key] = dataStore[key].Count;
+        }
+    }
+    public void LoadDataStore()
+    {
+        dataStore?.Clear();
+        for (int i = 0; i < remainPositions.Count; i++)
+        {
+            int pos = remainPositions[i];
+            Slot currentSlot = slots[pos];
+            string key = currentSlot.GetName();
+            List<Slot> keyData = dataStore.ContainsKey(key) ? dataStore[key] : new();
+            keyData.Add(currentSlot);
+            dataStore[key] = new(keyData);
+        }
+        LoadDataRemain();
+        LoadDataItems();
+    }
+    public void LoadDataItems()
+    {
+        dataItems?.Clear();
+        for (int i = 0; i < items.Count; i++)
+        {
+            Item current = items[i];
+            List<Slot> slotData = dataStore[current.itemName];
+            for (int currentIndex = 0; currentIndex < slotData.Count; currentIndex++)
+            {
+                Slot currentSlot = slotData[currentIndex];
+
+                for (int nextIndex = currentIndex + 1; nextIndex < slotData.Count; nextIndex++)
+                {
+                    Slot compareSlot = slotData[nextIndex];
+                    bool canConnect = currentSlot.StartCheck(compareSlot.GetPosition());
+                    if (canConnect)
+                    {
+                        dataItems.Add(new(currentSlot, compareSlot));
+                    }
+                }
+            }
+        }
+        if (dataItems.Count == 0)
+        {
+            Refresh();
+        }
+    }
+    public void Refresh()
+    {
+        List<int> remainPositionsTemp = new(remainPositions);
+        for (int i = 0; i < items.Count; i++)
+        {
+            Item item = items[i];
+            string key = item.itemName;
+            int remain = dataRemainStore.ContainsKey(key) ? dataRemainStore[key] : 0;
+
+            int pair = remain / 2;
+            while (pair > 0 && remainPositionsTemp.Count > 0)
+            {
+                int key1 = Random.Range(0, remainPositionsTemp.Count);
+                int pos1 = remainPositionsTemp[key1];
+                Slot slot1 = slots[pos1];
+                slot1.ChangeSlotItem(item);
+                remainPositionsTemp.Remove(pos1);
+
+                int key2 = Random.Range(0, remainPositionsTemp.Count);
+                int pos2 = remainPositionsTemp[key2];
+                Slot slot2 = slots[pos2];
+                slot2.ChangeSlotItem(item);
+                remainPositionsTemp.Remove(pos2);
+                pair--;
+            }
+        }
+        LoadDataStore();
+    }
+
+    public void GetRight(Slot slot1, Slot slot2)
+    {
+        remainPositions.Remove(slot1.GetPosition());
+        remainPositions.Remove(slot2.GetPosition());
+
+        string key1 = slot1.GetName();
+        string key2 = slot2.GetName();
+
+        dataRemainStore[key1] -= 1;
+        dataRemainStore[key2] -= 1;
+
+        for (int i = 0; i < dataItems.Count; i++)
+        {
+            DataItem item = dataItems[i];
+            if (item.Contain(slot1, slot2))
+            {
+                dataItems.RemoveAt(i);
+                i--;
+            }
+        }
+        if (dataItems.Count == 0)
+        {
+            LoadDataItems();
+        }
+    }
+
     public int GetTotalWidthSlot()
     {
         return currentWithSlot + 2;
@@ -148,5 +275,28 @@ public class Item
     {
         this.sprite = sprite;
         itemName = name;
+    }
+}
+
+public class DataItem
+{
+    public Slot slot1;
+    public Slot slot2;
+    public DataItem(Slot slot1, Slot slot2)
+    {
+        this.slot1 = slot1;
+        this.slot2 = slot2;
+    }
+    public bool Contain(Slot slot_1, Slot slot_2)
+    {
+        if (slot1 == slot_1 || slot1 == slot_2)
+        {
+            return true;
+        }
+        if (slot2 == slot_1 || slot2 == slot_2)
+        {
+            return true;
+        }
+        return false;
     }
 }

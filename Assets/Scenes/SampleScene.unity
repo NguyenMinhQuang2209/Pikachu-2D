@@ -500,7 +500,7 @@ AudioSource:
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 500
+  MaxDistance: 496.25085
   Pan2D: 0
   rolloffMode: 0
   BypassEffects: 0
@@ -965,6 +965,6 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 519420032}
-  - {fileID: 1691751724}
   - {fileID: 699890845}
   - {fileID: 693750657}
+  - {fileID: 1691751724}
