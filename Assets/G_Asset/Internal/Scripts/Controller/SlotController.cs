@@ -33,9 +33,9 @@ public class SlotController : MonoBehaviour
     private void Start()
     {
         InitItem();
-        SpawnSlotItem(16, 11);
         currentWithSlot = maxWithSlot;
         currentHeightSlot = maxHeightSlot;
+        SpawnSlotItem(currentWithSlot, currentHeightSlot);
     }
     public void InitItem()
     {
@@ -44,6 +44,10 @@ public class SlotController : MonoBehaviour
             Item newItem = new(sprites[i], i.ToString());
             items.Add(newItem);
         }
+    }
+    public Slot GetSlot(int pos)
+    {
+        return slots[pos];
     }
     public void SpawnSlotItem(int w, int h)
     {
@@ -124,6 +128,14 @@ public class SlotController : MonoBehaviour
             notUse.Remove(nextPos);
             currentIndex = currentIndex == items.Count - 1 ? 0 : currentIndex + 1;
         }
+    }
+    public int GetTotalWidthSlot()
+    {
+        return currentWithSlot + 2;
+    }
+    public int GetTotalHeightSlot()
+    {
+        return currentHeightSlot + 2;
     }
 
 }

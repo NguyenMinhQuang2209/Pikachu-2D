@@ -34,8 +34,16 @@ public class TouchController : MonoBehaviour
                 }
                 else
                 {
-                    currentSlot.TurnOff();
-                    newSlot.TurnOff();
+                    bool hasPath = currentSlot.StartCheck(newSlot.GetPosition());
+                    if (hasPath)
+                    {
+                        currentSlot.TurnOff();
+                        newSlot.TurnOff();
+                    }
+                    else
+                    {
+                        currentSlot.OnChoose(false);
+                    }
                     currentSlot = null;
                 }
             }

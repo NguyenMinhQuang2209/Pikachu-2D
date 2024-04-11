@@ -10,3 +10,11 @@ public enum SlotPosition
     Bottom_Right,
     Other
 }
+public enum ParentPosition
+{
+    Top,
+    Left,
+    Right,
+    Bottom,
+    Other
+}
