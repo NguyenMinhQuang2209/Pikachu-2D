@@ -41,6 +41,7 @@ public class TouchController : MonoBehaviour
                 bool isEqual = currentSlot.IsEqual(newSlot);
                 if (!isEqual)
                 {
+                    SoundController.instance.PlayWrongSound();
                     currentSlot.OnChoose(false);
                     currentSlot = null;
                 }
@@ -49,6 +50,7 @@ public class TouchController : MonoBehaviour
                     bool hasPath = currentSlot.StartCheck(newSlot.GetPosition());
                     if (hasPath)
                     {
+                        SoundController.instance.PlayWinSound();
                         List<SlotLine> slots = currentSlot.GetLine();
                         foreach (SlotLine slot in slots)
                         {
@@ -60,6 +62,7 @@ public class TouchController : MonoBehaviour
                     }
                     else
                     {
+                        SoundController.instance.PlayWrongSound();
                         currentSlot.OnChoose(false);
                     }
                     currentSlot = null;
