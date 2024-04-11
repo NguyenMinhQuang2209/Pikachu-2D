@@ -18,3 +18,12 @@ public enum ParentPosition
     Bottom,
     Other
 }
+public enum SlotDirection
+{
+    Horizontal,
+    Vetical,
+    Top_Right,
+    Top_Left,
+    Bottom_Right,
+    Bottom_Left
+}

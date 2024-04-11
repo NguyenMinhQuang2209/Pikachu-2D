@@ -18,6 +18,8 @@ public class Slot : MonoBehaviour
 
     bool isTurnOff = false;
 
+    List<SlotLine> slotLines = new();
+
 
     private void Start()
     {
@@ -36,6 +38,7 @@ public class Slot : MonoBehaviour
         iconImg.sprite = newItem.sprite;
         OnChoose(false);
         position = SlotPosition.Other;
+        isTurnOff = false;
     }
     public void SlotInit(int pos)
     {
@@ -77,17 +80,33 @@ public class Slot : MonoBehaviour
     }
     public bool StartCheck(int target)
     {
-        return Check(0, pos, target, false);
+        slotLines?.Clear();
+        bool result = Check(1, pos, target, slotLines, false);
+        return result;
     }
-    public bool Check(int total, int parent, int target, bool isNotRoot = true)
+    public List<SlotLine> GetLine()
     {
-        if (pos == target)
-        {
-            return true;
-        }
+        return slotLines;
+    }
+    public void ChangeSprite(Sprite newSprite, float timer)
+    {
+        bgImg.sprite = newSprite;
+        bgImg.gameObject.SetActive(true);
+        Invoke(nameof(FadeOff), timer);
+    }
+    public void FadeOff()
+    {
+        bgImg.gameObject.SetActive(false);
+    }
+    public bool Check(int total, int parent, int target, List<SlotLine> slotLine, bool isNotRoot = true)
+    {
         if (total > 3)
         {
             return false;
+        }
+        if (pos == target)
+        {
+            return true;
         }
         if (isNotRoot)
         {
@@ -158,9 +177,26 @@ public class Slot : MonoBehaviour
         {
             Slot checkSlot = SlotController.instance.GetSlot(left);
             int nextTotal = (parentPosition != ParentPosition.Top && parentPosition != ParentPosition.Bottom) ? total : total + 1;
-            result = checkSlot.Check(nextTotal, pos, target);
+            result = checkSlot.Check(nextTotal, pos, target, slotLine);
             if (result)
             {
+                SlotDirection newDir = SlotDirection.Horizontal;
+                if (parentPosition != ParentPosition.Top && parentPosition != ParentPosition.Bottom)
+                {
+                    newDir = SlotDirection.Horizontal;
+                }
+                else
+                {
+                    if (parentPosition == ParentPosition.Top)
+                    {
+                        newDir = SlotDirection.Top_Left;
+                    }
+                    if (parentPosition == ParentPosition.Bottom)
+                    {
+                        newDir = SlotDirection.Bottom_Left;
+                    }
+                }
+                slotLine.Add(new(this, newDir));
                 return true;
             }
         }
@@ -168,9 +204,26 @@ public class Slot : MonoBehaviour
         {
             Slot checkSlot = SlotController.instance.GetSlot(right);
             int nextTotal = (parentPosition != ParentPosition.Top && parentPosition != ParentPosition.Bottom) ? total : total + 1;
-            result = checkSlot.Check(nextTotal, pos, target);
+            result = checkSlot.Check(nextTotal, pos, target, slotLine);
             if (result)
             {
+                SlotDirection newDir = SlotDirection.Horizontal;
+                if (parentPosition != ParentPosition.Top && parentPosition != ParentPosition.Bottom)
+                {
+                    newDir = SlotDirection.Horizontal;
+                }
+                else
+                {
+                    if (parentPosition == ParentPosition.Top)
+                    {
+                        newDir = SlotDirection.Top_Right;
+                    }
+                    if (parentPosition == ParentPosition.Bottom)
+                    {
+                        newDir = SlotDirection.Bottom_Right;
+                    }
+                }
+                slotLine.Add(new(this, newDir));
                 return true;
             }
         }
@@ -178,9 +231,26 @@ public class Slot : MonoBehaviour
         {
             Slot checkSlot = SlotController.instance.GetSlot(top);
             int nextTotal = (parentPosition != ParentPosition.Right && parentPosition != ParentPosition.Left) ? total : total + 1;
-            result = checkSlot.Check(nextTotal, pos, target);
+            result = checkSlot.Check(nextTotal, pos, target, slotLine);
             if (result)
             {
+                SlotDirection newDir = SlotDirection.Vetical;
+                if (parentPosition != ParentPosition.Right && parentPosition != ParentPosition.Left)
+                {
+                    newDir = SlotDirection.Vetical;
+                }
+                else
+                {
+                    if (parentPosition == ParentPosition.Right)
+                    {
+                        newDir = SlotDirection.Top_Right;
+                    }
+                    if (parentPosition == ParentPosition.Left)
+                    {
+                        newDir = SlotDirection.Top_Left;
+                    }
+                }
+                slotLine.Add(new(this, newDir));
                 return true;
             }
         }
@@ -188,13 +258,41 @@ public class Slot : MonoBehaviour
         {
             Slot checkSlot = SlotController.instance.GetSlot(bottom);
             int nextTotal = (parentPosition != ParentPosition.Right && parentPosition != ParentPosition.Left) ? total : total + 1;
-            result = checkSlot.Check(nextTotal, pos, target);
+            result = checkSlot.Check(nextTotal, pos, target, slotLine);
             if (result)
             {
+                SlotDirection newDir = SlotDirection.Vetical;
+                if (parentPosition != ParentPosition.Right && parentPosition != ParentPosition.Left)
+                {
+                    newDir = SlotDirection.Vetical;
+                }
+                else
+                {
+                    if (parentPosition == ParentPosition.Right)
+                    {
+                        newDir = SlotDirection.Bottom_Right;
+                    }
+                    if (parentPosition == ParentPosition.Left)
+                    {
+                        newDir = SlotDirection.Bottom_Left;
+                    }
+                }
+                slotLine.Add(new(this, newDir));
                 return true;
             }
         }
 
         return false;
+    }
+}
+[System.Serializable]
+public class SlotLine
+{
+    public Slot currentSlot;
+    public SlotDirection direction;
+    public SlotLine(Slot nextSlot, SlotDirection nextDirection)
+    {
+        currentSlot = nextSlot;
+        direction = nextDirection;
     }
 }
